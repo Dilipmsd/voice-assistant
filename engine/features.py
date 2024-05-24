@@ -15,16 +15,22 @@ from engine.config import ASSISTANT_NAME
 # Playing assiatnt sound function
 import pywhatkit as kit
 import pvporcupine
+import datefinder
+import datetime
 
 from engine.helper import extract_yt_term, remove_words
 from hugchat import hugchat
+
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
 
 con = sqlite3.connect("jarvis.db")
 cursor = con.cursor()
 
 @eel.expose
 def playAssistantSound():
-    music_dir = "www\\assets\\audio\\start_sound.mp3"
+    music_dir = "www/assets/audio/start_sound.mp3"
     playsound(music_dir)
 
     
@@ -67,9 +73,11 @@ def openCommand(query):
        
 
 def PlayYoutube(query):
+    print("youtube selected")
     search_term = extract_yt_term(query)
-    speak("Playing "+search_term+" on YouTube")
-    kit.playonyt(search_term)
+    print("youtube selected2", search_term)
+    os.system(f'say "Playing {search_term}  on YouTube"')
+    kit.playonyt(search_term)  
 
 
 def hotword():
@@ -173,6 +181,7 @@ def whatsApp(mobile_no, message, flag, name):
     pyautogui.hotkey('enter')
     speak(jarvis_message)
 
+
 # chat bot 
 def chatBot(query):
     user_input = query.lower()
@@ -183,3 +192,125 @@ def chatBot(query):
     print(response)
     speak(response)
     return response
+
+
+def play_first_song(query):
+    print("coming here")
+        # Initialize a WebDriver instance (make sure to have the appropriate browser driver installed)
+    driver = webdriver.Chrome()  # Using Chrome WebDriver
+
+        # Search YouTube for the query
+    search_url = "https://www.youtube.com/results?search_query=" + query
+    print("Navigating to:", search_url)
+    driver.get(search_url)
+
+        # Find the first video link
+    video_link = driver.find_element(By.CSS_SELECTOR, "#contents ytd-video-renderer #video-title")
+    print("Found video link:", video_link.get_attribute("href"))
+
+        # Click on the video link
+    video_link.click()
+
+        # Optionally, you might need to handle age verification pop-ups or consent forms here
+
+        # Add a delay to allow the video to start playing
+    time.sleep(500000)  # Adjust the delay time as needed
+
+        # Play the video (simulate pressing the 'k' key)
+    webdriver.ActionChains(driver).send_keys(Keys.SPACE).perform()
+
+        # Keep the program running for a while to allow the video to play
+    time.sleep(30000)  # Adjust the time as needed
+
+def search_google(query):
+    url = f"https://www.google.com/search?q={query}"
+    webbrowser.open_new_tab(url)
+
+def alarm():
+    from engine.command import takecommand
+    query = takecommand()
+    if query:
+        # Find all date and time matches in the text
+        dTimeA = list(datefinder.find_dates(query))
+
+        # Iterate over each match
+        for mat in dTimeA:
+            print(mat)
+            speak("your reminder is at"+mat)
+            # Extract hour and minute from the match
+            hourA = mat.hour
+            minA = mat.minute
+
+            # Check if the alarm time matches the current time
+            while True:
+                if hourA == datetime.datetime.now().hour and minA == datetime.datetime.now().minute:
+                    print("Alarm is running")
+                    speak("Alarm is running")
+                    # Play the sound (replace the path with the correct one)
+                    playsound("/Users/dilipbganesh/Downloads/funk-in-kingdom-200507.mp3", True)
+                elif minA < datetime.datetime.now().minute:
+                    break
+
+# def select_language():
+#     say("Which language would you like to translate to?")
+#     say("You can say: 'Spanish', 'French', or 'German'")
+    
+#     recognizer = sr.Recognizer()
+    
+#     with sr.Microphone() as source:
+#         say("Listening for language choice...")
+#         audio = recognizer.listen(source)
+    
+#     try:
+#         choice = recognizer.recognize_google(audio)
+#         print("You chose:", choice)
+        
+#         language_map = {'spanish': 'es', 'french': 'fr', 'german': 'de'}
+#         target_language = language_map.get(choice.lower())
+        
+#         if target_language:
+#             return target_language
+#         else:
+#             print("Sorry, couldn't recognize the language. Defaulting to English.")
+#             return 'en'
+        
+#     except sr.UnknownValueError:
+#         print("Sorry, could not understand audio.")
+#         return 'en'
+#     except sr.RequestError as e:
+#         print("Could not request results; {0}".format(e))
+#         return 'en'
+#     except Exception as e:
+#         print("Error occurred; {0}".format(e))
+#         return 'en'
+
+# # def speak_text(text):
+# #     subprocess.call(['say', '-v', 'Alex', text])  # Adjust 'Alex' to the desired voice
+    
+# def listen_and_translate():
+#     recognizer = sr.Recognizer()
+#     translator = Translator()
+    
+#     with sr.Microphone() as source:
+#         print("Listening...")
+#         audio = recognizer.listen(source)
+#         print("Recognizing...")
+    
+#     try:
+#         text = recognizer.recognize_google(audio)
+#         print("You said:", text)
+        
+#         target_language = select_language()
+#         translated_text = translator.translate(text, dest=target_language).text
+#         print("Translated text:", translated_text)
+        
+#         say(translated_text)
+        
+#     except sr.UnknownValueError:
+#         print("Sorry, could not understand audio.")
+#     except sr.RequestError as e:
+#         print("Could not request results; {0}".format(e))
+#     except Exception as e:
+#         print("Error occurred; {0}".format(e))
+
+# listen_and_translate()

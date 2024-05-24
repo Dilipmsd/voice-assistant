@@ -34,8 +34,7 @@ $(document).ready(function () {
         out: {
             effect: "fadeOutUp",
             sync: true,
-        },
-
+        }
     });
 
     // mic button click event
@@ -46,11 +45,18 @@ $(document).ready(function () {
         $("#SiriWave").attr("hidden", false);
         eel.allCommands()()
     });
-
+    $(document).keypress(function(event) {
+        if (event.ctrlKey && event.charCode === 10) {
+            eel.playAssistantSound()
+            $("#Oval").attr("hidden", true);
+            $("#SiriWave").attr("hidden", false);
+            eel.allCommands()()
+        }
+    })
 
     function doc_keyUp(e) {
         // this would test for whichever key is 40 (down arrow) and the ctrl key at the same time
-
+        console.log('key pressed', e);
         if (e.key === 'j' && e.metaKey) {
             eel.playAssistantSound()
             $("#Oval").attr("hidden", true);
@@ -58,7 +64,7 @@ $(document).ready(function () {
             eel.allCommands()()
         }
     }
-    document.addEventListener('keyup', doc_keyUp, false);
+    document.addEventListener('keydown', doc_keyUp);
 
     // to play assisatnt 
     function PlayAssistant(message) {
